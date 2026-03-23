@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Prompt Toolkit — Teen Builder's Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#17171f;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#e8e8f0;--muted:#7a7a9a;--dim:#444466;--purple:#a78bfa;--purple-bg:rgba(167,139,250,0.1);--purple-border:rgba(167,139,250,0.25);--teal:#2dd4bf;--teal-bg:rgba(45,212,191,0.1);--teal-border:rgba(45,212,191,0.25);--amber:#fbbf24;--amber-bg:rgba(251,191,36,0.1);--amber-border:rgba(251,191,36,0.25);--blue:#60a5fa;--blue-bg:rgba(96,165,250,0.1);--blue-border:rgba(96,165,250,0.25);--pink:#f472b6;--pink-bg:rgba(244,114,182,0.1);--pink-border:rgba(244,114,182,0.25);--green:#4ade80;--green-bg:rgba(74,222,128,0.1);--green-border:rgba(74,222,128,0.25);--mono:'Space Mono',monospace;--display:'Syne',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--display);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 24px 80px}
+.hero{padding:80px 0 60px;border-bottom:1px solid var(--border);margin-bottom:48px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--purple);background:var(--purple-bg);border:1px solid var(--purple-border);padding:5px 12px;border-radius:4px;margin-bottom:28px;letter-spacing:.08em;text-transform:uppercase}
+.hero-tag span{width:6px;height:6px;border-radius:50%;background:var(--purple);display:inline-block;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:var(--display);font-size:clamp(36px,6vw,60px);font-weight:800;line-height:1.05;letter-spacing:-.03em;margin-bottom:20px}
+h1 em{font-style:normal;color:var(--purple)}
+.hero-sub{font-size:16px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:36px;font-weight:400}
+.stats{display:flex;gap:32px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:3px}
+.stat-num{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--dim);font-family:var(--mono);font-size:13px;pointer-events:none}
+.search{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px 10px 38px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .2s}
+.search:focus{border-color:var(--purple)}
+.search::placeholder{color:var(--dim)}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;align-items:center}
+.pill{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.02em}
+.pill:hover{border-color:var(--border2);color:var(--text)}
+.pill.active{color:var(--purple);border-color:var(--purple-border);background:var(--purple-bg)}
+.pill.active[data-tag="notebook"]{color:var(--teal);border-color:var(--teal-border);background:var(--teal-bg)}
+.pill.active[data-tag="gemini"]{color:var(--amber);border-color:var(--amber-border);background:var(--amber-bg)}
+.pill.active[data-tag="any"]{color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg)}
+.pill.active[data-tag="design"]{color:var(--pink);border-color:var(--pink-border);background:var(--pink-bg)}
+.count-badge{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto;white-space:nowrap}
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;animation:fadeUp .3s ease both}
+.card:hover{border-color:var(--border2)}
+.card.open{border-color:var(--border2)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-head{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none;transition:background .15s}
+.card-head:hover{background:var(--bg3)}
+.tag{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;border:1px solid}
+.tag-claude{color:var(--purple);border-color:var(--purple-border);background:var(--purple-bg)}
+.tag-notebook{color:var(--teal);border-color:var(--teal-border);background:var(--teal-bg)}
+.tag-gemini{color:var(--amber);border-color:var(--amber-border);background:var(--amber-bg)}
+.tag-any{color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg)}
+.tag-design{color:var(--pink);border-color:var(--pink-border);background:var(--pink-bg)}
+.card-title{font-size:14px;font-weight:600;flex:1;color:var(--text)}
+.card-meta{font-size:12px;color:var(--dim);font-family:var(--mono);white-space:nowrap}
+.arrow{color:var(--dim);font-size:11px;transition:transform .25s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+.card.open .arrow{transform:rotate(90deg)}
+.card-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border)}
+.card.open .card-body{display:block}
+.prompt-label{font-family:var(--mono);font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;padding:14px 0 10px}
+.prompt-box{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px 16px 16px 20px;border-left:2px solid var(--purple)}
+.card[data-tag="notebook"] .prompt-box{border-left-color:var(--teal)}
+.card[data-tag="gemini"] .prompt-box{border-left-color:var(--amber)}
+.card[data-tag="any"] .prompt-box{border-left-color:var(--blue)}
+.card[data-tag="design"] .prompt-box{border-left-color:var(--pink)}
+.prompt-text{font-family:var(--mono);font-size:12px;line-height:1.9;color:#c4c4d8;white-space:pre-wrap;word-break:break-word;padding-right:70px}
+.copy-btn{position:absolute;top:12px;right:12px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-size:11px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.copy-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--purple)}
+.copy-btn.ok{color:var(--green);border-color:var(--green-border);background:var(--green-bg)}
+.tip{margin-top:12px;padding:10px 14px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.7;font-family:var(--mono);border-left:2px solid var(--amber)}
+.tip strong{color:var(--amber)}
+.empty{text-align:center;padding:60px 20px;color:var(--dim);font-family:var(--mono);font-size:13px}
+.footer{margin-top:64px;padding-top:32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-text{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.footer-text span{color:var(--purple)}
+@media(max-width:600px){.card-meta{display:none}.stats{gap:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="hero-tag"><span></span>v1.0 — teen builder's edition</div>
+  <h1>AI Agent<br><em>Prompt Toolkit</em></h1>
+  <p class="hero-sub">14 copy-paste prompts for Claude, NotebookLM, Gemini and any AI tool. Designed for 14-year-old builders starting their first agent project.</p>
+  <div class="stats">
+    <div class="stat"><span class="stat-num">14</span><span class="stat-label">prompts</span></div>
+    <div class="stat"><span class="stat-num">5</span><span class="stat-label">ai tools</span></div>
+    <div class="stat"><span class="stat-num">&#8734;</span><span class="stat-label">projects</span></div>
+  </div>
+</header>
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">/</span>
+    <input class="search" id="search" placeholder="search prompts..." oninput="render()" autocomplete="off" spellcheck="false">
+  </div>
+</div>
+<div class="pills">
+  <button class="pill active" data-tag="all" onclick="setFilter('all',this)">all</button>
+  <button class="pill" data-tag="claude" onclick="setFilter('claude',this)">claude</button>
+  <button class="pill" data-tag="notebook" onclick="setFilter('notebook',this)">notebooklm</button>
+  <button class="pill" data-tag="any" onclick="setFilter('any',this)">any ai tool</button>
+  <button class="pill" data-tag="design" onclick="setFilter('design',this)">agent design</button>
+  <button class="pill" data-tag="gemini" onclick="setFilter('gemini',this)">gemini / perplexity</button>
+  <span class="count-badge" id="count-badge">14 prompts</span>
+</div>
+<div class="cards" id="cards"></div>
+<footer class="footer">
+  <span class="footer-text">built for curious minds &mdash; <span>start building</span></span>
+  <span class="footer-text">save this file &mdash; works offline</span>
+</footer>
+</div>
+<script>
+const P=[
+{id:1,tag:'claude',title:"Explain it like I'm 14",meta:'any concept \u2192 simple',tip:"Replace [REPLACE WITH YOUR TOPIC] with any concept \u2014 e.g. \"how ReAct agents work\", \"what is RAG\", \"how does MCP work\"",prompt:`You are an expert AI tutor teaching a 14-year-old high school student who is passionate about building AI agents for the first time.
+
+Topic I want to understand: [REPLACE WITH YOUR TOPIC]
+
+Please structure your answer exactly like this:
+
+1. ONE-SENTENCE DEFINITION \u2014 no jargon, max 20 words
+2. REAL-WORLD ANALOGY \u2014 relate it to a game, sport, or everyday situation I know
+3. HOW IT WORKS \u2014 numbered step-by-step (max 6 steps), plain language only
+4. PYTHON CODE EXAMPLE \u2014 10-20 lines, with a comment on every line
+5. THREE THINGS TO REMEMBER \u2014 the most important takeaways
+6. ONE MINI-PROJECT \u2014 a small thing I can build this week to practise this concept
+
+If you use any technical word, define it immediately in brackets. Keep every sentence short.`},
+{id:2,tag:'claude',title:'Debug my agent code',meta:'paste error \u2192 get fix',tip:'Paste your full error from the terminal \u2014 include all lines starting with "Traceback". The more detail you give, the better the fix.',prompt:`You are a senior Python developer specialising in AI agents. A 14-year-old student learning to build their first agent has a bug and needs help.
+
+Their code:
+<code>
+[PASTE YOUR CODE HERE]
+</code>
+
+The error they got:
+<e>
+[PASTE THE FULL ERROR MESSAGE HERE]
+</e>
+
+What they expected to happen:
+<expected>
+[DESCRIBE IN ONE SENTENCE WHAT SHOULD HAVE HAPPENED]
+</expected>
+
+Please help them by:
+1. Explaining the bug in simple terms (no jargon)
+2. Showing the corrected code with a comment on every changed line
+3. Explaining WHY the fix works
+4. Giving one tip to prevent this type of bug in future
+5. Checking if there are any other issues in the code worth mentioning
+
+Use encouraging, friendly language \u2014 this is their first agent!`},
+{id:3,tag:'claude',title:'Design my agent from scratch',meta:'goal \u2192 full architecture',tip:'The more specific your goal, the better the architecture. Bad: "make a useful agent". Good: "agent that monitors my email and drafts replies based on my style".',prompt:`I am a 14-year-old student with basic Python knowledge. I want to build an AI agent and need help designing it before I write any code.
+
+My goal for this agent:
+<goal>
+[DESCRIBE WHAT YOU WANT YOUR AGENT TO DO \u2014 BE SPECIFIC]
+Example: "An agent that searches the web for the latest news on a topic, summarises it, and saves the summary to a text file"
+</goal>
+
+Please answer these questions clearly:
+
+1. WHICH LLM SHOULD I USE? \u2014 Recommend one (prefer free or very cheap options)
+2. WHAT TOOLS DOES IT NEED? \u2014 List every tool, why it's needed, and if a free version exists
+3. WHAT MEMORY TYPE? \u2014 Short-term only? Long-term RAG? External file? None?
+4. WHICH FRAMEWORK? \u2014 Recommend one beginner-friendly framework and explain why
+5. SIMPLEST VERSION FIRST \u2014 What is the bare minimum I can build in one week?
+6. WHAT COULD GO WRONG? \u2014 Top 3 risks and how to guard against each
+7. NEXT STEPS \u2014 Numbered list of exactly what to do first
+
+Format your answer with bold headings for each question. Be specific \u2014 not generic advice.`},
+{id:4,tag:'claude',title:'Teach me prompt engineering',meta:'master the #1 agent skill',tip:'After reading the response, rewrite your last 3 prompts using these techniques and compare the quality difference \u2014 it is significant.',prompt:`I am a 14-year-old learning to build AI agents. Prompt engineering is the most important skill I need to master first.
+
+Teach me the following prompt engineering techniques. For each one give me:
+(a) What it is \u2014 one sentence, plain language
+(b) When to use it \u2014 in what situation does this shine?
+(c) Before/after example \u2014 show a weak prompt upgraded using this technique
+(d) Agent-specific tip \u2014 how is this used differently when programming an agent vs. just chatting?
+
+Techniques to cover:
+\u2022 Zero-shot prompting
+\u2022 Few-shot prompting (with examples)
+\u2022 Chain of Thought ("think step by step")
+\u2022 Role assignment ("You are a...")
+\u2022 Output format specification
+\u2022 XML tags for structure
+\u2022 ReAct prompting (Reason + Act)
+\u2022 Self-consistency
+
+After all techniques, give me a CHEAT SHEET \u2014 one sentence for each technique I can save and refer back to.`},
+{id:5,tag:'claude',title:'Create my personalised study plan',meta:'3-month roadmap',tip:'Fill in your actual hours per week and honest Python level before sending. A realistic plan beats an ambitious one you will not follow.',prompt:`I am a 14-year-old high school student. I want to build AI agents as a serious hobby. I have about [X HOURS] per week to spend learning and building.
+
+My current skills:
+- Python: [beginner / can write basic scripts / comfortable with functions and classes]
+- Maths: [just started high school / comfortable with algebra / strong at maths]
+- Prior AI experience: [none / used ChatGPT / built small projects]
+
+Please create a personalised 3-month learning plan for me with:
+
+MONTH 1 \u2014 FOUNDATIONS
+Week-by-week goals, what to learn, where to learn it (free resources only), one small project per week
+
+MONTH 2 \u2014 BUILDING BLOCKS
+Same format \u2014 introduce tools, memory, basic agents
+
+MONTH 3 \u2014 REAL AGENT
+Same format \u2014 build and ship one complete working agent project
+
+For each week include:
+- One YouTube video or free course (with channel name)
+- One thing to read (docs, blog post, or free tutorial)
+- One thing to build (small, achievable in a weekend)
+
+End with a list of 5 beginner project ideas sorted from easiest to hardest.`},
+{id:6,tag:'notebook',title:'Summarise a framework doc',meta:'upload docs \u2192 key concepts',tip:'In NotebookLM: upload the framework PDF or paste the docs URL as a source first, then use this prompt in the chat window.',prompt:`I have uploaded documentation for [NAME THE FRAMEWORK \u2014 e.g. LangChain, CrewAI, AutoGen, Pydantic AI].
+
+I am a 14-year-old student building my first AI agent. I have never used this framework before.
+
+Please create for me:
+
+1. WHAT IS IT? \u2014 3-sentence plain-English summary of what this framework does
+2. KEY CONCEPTS \u2014 The 5 most important concepts I must understand to use this framework
+3. HOW IT DIFFERS \u2014 How is it different from just using the Claude or OpenAI API directly?
+4. HELLO WORLD \u2014 The simplest possible code example mentioned in these docs (if present)
+5. WHEN TO USE IT \u2014 Describe the exact situation where this framework is the best choice
+6. WHEN NOT TO USE IT \u2014 When would a different tool be better?
+7. GAPS IN THESE DOCS \u2014 List 5 things a beginner needs to know that are NOT covered here
+
+Use simple language throughout. If a concept has a confusing name, rename it in plain English.`},
+{id:7,tag:'notebook',title:'Deep dive on MCP',meta:'for Anthropic MCP docs',tip:'Upload the MCP docs from modelcontextprotocol.io as a PDF or paste the URL as a NotebookLM source, then send this prompt.',prompt:`Using the MCP (Model Context Protocol) documentation I have uploaded, please teach me everything I need to know as a 14-year-old beginner building my first AI agent.
+
+Answer each question in order:
+
+1. WHY DOES MCP EXIST?
+What problem existed before MCP? How did people connect agents to tools before it? Why was that painful?
+
+2. CORE CONCEPTS
+Define each of these in one plain sentence: MCP Host, MCP Client, MCP Server, Tool, Resource, Prompt (in MCP context)
+
+3. STEP BY STEP \u2014 WHAT HAPPENS?
+Walk me through what happens, step by step, when my agent uses an MCP server to search the web. Use a numbered list.
+
+4. HOW DO I USE IT IN PYTHON?
+Show the simplest possible code example from the docs. Explain every line.
+
+5. TOP 5 MCP SERVERS TO TRY FIRST
+Which MCP servers are best for a beginner? For each: what it does, how to install it, and one thing I can build with it.
+
+6. SECURITY RISKS
+What could go wrong if I connect too many MCP servers? How do I stay safe?`},
+{id:8,tag:'notebook',title:'Compare two agent frameworks',meta:'side-by-side deep dive',tip:'Replace [FRAMEWORK A] and [FRAMEWORK B] with the two you are deciding between \u2014 e.g. "CrewAI and LangChain". Upload both doc sets as sources.',prompt:`I have uploaded documentation for two agent frameworks: [FRAMEWORK A] and [FRAMEWORK B].
+
+I am a 14-year-old student choosing which one to learn first. Please help me decide by comparing them:
+
+1. LEARNING CURVE \u2014 Which is easier to start with? Why?
+2. CODE STYLE \u2014 Show a tiny example of each doing the same thing (e.g. "call a web search tool")
+3. COMMUNITY & SUPPORT \u2014 Which has more tutorials, YouTube videos, Discord communities?
+4. MULTI-AGENT SUPPORT \u2014 How does each handle multiple agents working together?
+5. MCP SUPPORT \u2014 Does either natively support MCP servers?
+6. BEST USE CASES \u2014 Give 3 project ideas ideal for Framework A vs. 3 for Framework B
+7. COST \u2014 What are the API costs? Any free tiers?
+8. MY RECOMMENDATION \u2014 Given that I am a beginner, which should I start with and why?
+
+End with a simple table summarising the comparison.`},
+{id:9,tag:'any',title:'Universal learning template',meta:'works in any AI tool',tip:'This template works in Claude, Gemini, ChatGPT, Copilot, Perplexity \u2014 anywhere. Just replace [INSERT TOPIC] and paste.',prompt:`I am a 14-year-old high school student learning to build AI agents for the first time. I have basic Python knowledge and no prior ML or AI experience.
+
+I want to deeply understand: [INSERT TOPIC]
+
+Please structure your response exactly like this:
+
+WHAT IS IT?
+One clear paragraph. No jargon. If you must use a technical term, define it in brackets immediately.
+
+HOW DOES IT WORK?
+Numbered step-by-step explanation. Maximum 8 steps. Each step is one or two sentences.
+
+REAL-WORLD EXAMPLE
+Show this concept working in a concrete, specific scenario. Include Python code (10-20 lines, with comments on every line).
+
+COMMON BEGINNER MISTAKES
+Exactly 3 mistakes. For each: what the mistake is, why people make it, and how to avoid it.
+
+WHAT TO LEARN NEXT
+After I understand this concept, what are the 3 best next topics to explore? List them in order.
+
+FREE RESOURCES
+Two or three free places to go deeper: a YouTube channel, a website, or a free course. No paid resources.`},
+{id:10,tag:'any',title:'Evaluate my agent idea',meta:'sanity check before building',tip:'Be as specific as possible. "An agent that helps with homework" is too vague. "An agent that takes a photo of my maths worksheet and solves each problem step by step" is perfect.',prompt:`I have an idea for an AI agent and I want an honest evaluation before I spend time building it.
+
+My agent idea:
+<idea>
+[DESCRIBE YOUR AGENT IDEA IN 3-5 SENTENCES]
+</idea>
+
+My current skills: Basic Python, just learned about LLMs and APIs, 14 years old, first agent project.
+
+Please evaluate my idea honestly across these areas:
+
+FEASIBILITY (1-10)
+Can a beginner build this? What makes it easy or hard?
+
+LEARNING VALUE (1-10)
+How much will I learn by building this vs. a simpler project?
+
+ORIGINALITY (1-10)
+Has this been done before? Is there a version that would be more unique?
+
+IMPROVED VERSION
+Suggest one way to make this idea more interesting, useful, or buildable for a beginner.
+
+SIMPLER STARTING POINT
+What is the simplest version I could complete in a single weekend?
+
+POTENTIAL ISSUES
+What are the top 3 things likely to go wrong, and how should I handle them?
+
+VERDICT
+Should I build this? If not, what would you recommend instead for my skill level?`},
+{id:11,tag:'any',title:'Write my system prompt',meta:"define your agent's personality",tip:"The system prompt is your agent's job description and rule book combined. A great system prompt fixes many bugs before they happen.",prompt:`Help me write a system prompt for my AI agent. A system prompt is the permanent set of instructions that defines what the agent is, how it behaves, and what rules it follows.
+
+Here is information about my agent:
+
+NAME: [What do you want to call your agent?]
+PURPOSE: [What is the main job of this agent?]
+TARGET USER: [Who will use it? e.g. "me, a 14-year-old student" / "my classmates" / "my family"]
+TOOLS AVAILABLE: [List the tools the agent has access to]
+PERSONALITY: [How should it sound? e.g. friendly and casual / professional / funny / patient teacher]
+THINGS IT MUST ALWAYS DO: [Any rules it must follow every time]
+THINGS IT MUST NEVER DO: [Any off-limits actions or topics]
+
+Write me a complete system prompt that:
+1. Defines the agent's role and purpose clearly
+2. Sets the right personality and tone
+3. Gives clear rules for tool use
+4. Handles edge cases (what to do when confused, when asked something off-topic, when a tool fails)
+5. Ends with a reminder of the agent's most important constraint
+
+Then explain: what are the 3 most important lines in this system prompt and why?`},
+{id:12,tag:'design',title:"Map out my agent's logic flow",meta:'plan before you code',tip:'Use this before every new agent project. Planning the flow in a chat saves hours of debugging later.',prompt:`I am building an AI agent and want to plan its logic before writing any code. Help me map out the full flow.
+
+My agent does this:
+<description>
+[DESCRIBE WHAT YOUR AGENT DOES IN 2-4 SENTENCES]
+</description>
+
+Example user input it will receive:
+<example_input>
+[WRITE AN EXAMPLE OF WHAT A USER WOULD SAY TO THIS AGENT]
+</example_input>
+
+Please create:
+
+1. STEP-BY-STEP FLOW
+Walk through exactly what the agent does from receiving the input to giving the final output. Number every step. Include decision points ("if X, then Y, else Z").
+
+2. TOOL CALL MAP
+For each tool the agent might use: when does it call it? what does it pass in? what does it expect back?
+
+3. ERROR HANDLING
+What should the agent do if: (a) a tool returns no results, (b) the user's request is unclear, (c) the task is impossible?
+
+4. PSEUDOCODE OUTLINE
+Write this as Python pseudocode (comments only, no real code) showing the structure of the main loop.
+
+5. WHAT COULD LOOP INFINITELY?
+Where in my flow could the agent get stuck? How do I add a safety exit?`},
+{id:13,tag:'design',title:'Review my agent for safety',meta:'guardrails and security check',tip:'Always do a safety review before letting anyone else use your agent. Even small agents can have surprising failure modes.',prompt:`Please review my AI agent design for safety issues and guardrails. I am a 14-year-old student and want to make sure my agent is safe before I share it with others.
+
+My agent description:
+<agent>
+[DESCRIBE YOUR AGENT \u2014 WHAT IT DOES, WHAT TOOLS IT HAS, WHO USES IT]
+</agent>
+
+My current system prompt:
+<system_prompt>
+[PASTE YOUR SYSTEM PROMPT HERE \u2014 OR WRITE "NOT WRITTEN YET"]
+</system_prompt>
+
+Please review for:
+
+1. INPUT RISKS \u2014 What harmful or unexpected inputs could break or misuse this agent?
+2. OUTPUT RISKS \u2014 Could this agent output harmful, false, or embarrassing content?
+3. TOOL RISKS \u2014 Could any tool be misused? (e.g. could someone make it send spam emails?)
+4. PRIVACY RISKS \u2014 Could this agent accidentally expose private data?
+5. COST RISKS \u2014 Could a user cause the agent to make thousands of API calls and drain my credits?
+
+For each risk: rate it Low/Medium/High, explain why, and suggest a specific fix.
+
+Then write me an improved system prompt that addresses the top 3 risks you found.`},
+{id:14,tag:'gemini',title:'Find free tools and APIs',meta:'research mode \u2014 uses web search',tip:'Works best in Gemini with Google Search, Perplexity, or Claude with web search enabled. Free tiers change often \u2014 double-check limits before committing.',prompt:`I am a 14-year-old student building AI agents as a hobby. I need to find free or very cheap APIs and tools to give my agent real capabilities. Please search the web for the latest options and report back.
+
+I need tools in these categories:
+1. WEB SEARCH \u2014 a free API that lets my agent search the internet
+2. NEWS \u2014 a free API to get recent news articles on any topic
+3. WEATHER \u2014 a free API to get current weather for any city
+4. CODE EXECUTION \u2014 a free or cheap way to run Python code inside my agent
+5. EMAIL SENDING \u2014 a free way to send emails programmatically
+6. VECTOR DATABASE \u2014 a free local option for storing agent memory
+
+For each category, find the 2 best free options and report:
+- Name and website
+- Free tier limits (requests per day/month)
+- How easy it is to set up (1=hard, 5=very easy)
+- One sentence on any catches or limitations
+- Direct link to the free signup or docs
+
+Focus on options available in 2025. Prefer options that do not require a credit card.`}
+];
+
+let filter='all',open=new Set();
+function setFilter(f,el){filter=f;document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');open.clear();render()}
+function matches(p,q){if(filter!=='all'&&p.tag!==filter)return false;if(!q)return true;return[p.title,p.meta,p.prompt,p.tip||''].join(' ').toLowerCase().includes(q)}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function render(){
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  const c=document.getElementById('cards');
+  const f=P.filter(p=>matches(p,q));
+  document.getElementById('count-badge').textContent=f.length+' prompt'+(f.length!==1?'s':'');
+  if(!f.length){c.innerHTML='<div class="empty">no prompts match \u2014 try a different keyword</div>';return}
+  c.innerHTML=f.map((p,i)=>{
+    const isOpen=open.has(p.id);
+    const tl={claude:'claude',notebook:'notebooklm',gemini:'gemini',any:'any ai tool',design:'agent design'}[p.tag];
+    return`<div class="card ${isOpen?'open':''}" data-tag="${p.tag}" id="card-${p.id}" style="animation-delay:${i*30}ms">
+<div class="card-head" onclick="toggle(${p.id})">
+<span class="tag tag-${p.tag}">${tl}</span>
+<span class="card-title">${esc(p.title)}</span>
+<span class="card-meta">${esc(p.meta)}</span>
+<span class="arrow">&#9654;</span>
+</div>
+<div class="card-body">
+<div class="prompt-label">// prompt \u2014 copy and paste into your ai tool</div>
+<div class="prompt-box">
+<pre class="prompt-text">${esc(p.prompt)}</pre>
+<button class="copy-btn" id="cb-${p.id}" onclick="copyIt(event,${p.id})">copy</button>
+</div>
+${p.tip?`<div class="tip"><strong>tip \u2014</strong> ${esc(p.tip)}</div>`:''}
+</div>
+</div>`}).join('')}
+function toggle(id){if(open.has(id))open.delete(id);else open.add(id);const card=document.getElementById('card-'+id);card.classList.toggle('open',open.has(id))}
+function copyIt(e,id){e.stopPropagation();const p=P.find(x=>x.id===id);if(!p)return;navigator.clipboard.writeText(p.prompt).then(()=>{const btn=document.getElementById('cb-'+id);btn.textContent='copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='copy';btn.classList.remove('ok')},2000)})}
+render();
+</script>
+</body>
+</html>
