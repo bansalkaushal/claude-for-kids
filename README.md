@@ -2,7 +2,7 @@
 
 > A free, shareable prompt toolkit for teen builders learning to create AI agents.
 
-**Live site →** `[https://YOUR-USERNAME.github.io/ai-agent-prompts](https://bansalkaushal.github.io/claude-for-kids/)`
+**Live site →** `https://bansalkaushal.github.io/claude-for-kids/`
 
 ---
 
